@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ConnectFour {
 
     internal class Board {
-
 
         //Board Properties
         public int Rows { get; set; }
@@ -46,6 +46,7 @@ namespace ConnectFour {
     }
 
 
+
     internal class Player {
 
         //Player Properties
@@ -67,6 +68,38 @@ namespace ConnectFour {
     }
 
 
+
+    internal class GameController {
+
+        //GameController Properties
+        private int turn = 0;
+        private List<Player> listPlayers = new List<Player>(2);
+
+        //GameController constructors
+        public GameController() {
+        
+        }
+
+        //GameController Methods
+        public void addPlayers() {
+            
+            Console.WriteLine("Please enter a name for player 1: ");
+            string namePlayer1 = Console.ReadLine();
+            var Player1 = new Player(namePlayer1, "X");
+            listPlayers.Add(Player1);
+            Console.WriteLine(Player1);
+
+            Console.WriteLine("Please enter a name for player 2: ");
+            string namePlayer2 = Console.ReadLine();
+            var Player2 = new Player(namePlayer2, "O");
+            listPlayers.Add(Player2);
+            Console.WriteLine(Player2);
+            
+        }
+
+
+    }
+
     internal class Program {
         static void Main(string[] args) {
             
@@ -75,17 +108,12 @@ namespace ConnectFour {
 
             myBoard.Display();
 
+            Console.WriteLine("Start Game...");
 
-            Console.WriteLine("Please enter a name for player 1: ");
-            string namePlayer1 = Console.ReadLine();
-            var Player1 = new Player(namePlayer1, "X");
-            Console.WriteLine(Player1);
+            var myGameController = new GameController();
 
-            Console.WriteLine("Please enter a name for player 2: ");
-            string namePlayer2 = Console.ReadLine();
-            var Player2 = new Player(namePlayer2, "O");
-            Console.WriteLine(Player2);
-
+            myGameController.addPlayers();
+            
 
 
 
