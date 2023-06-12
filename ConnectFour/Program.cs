@@ -3,16 +3,23 @@
 namespace ConnectFour {
 
     internal class Board {
+
+
+        //Board Properties
         public int Rows { get; set; }
         public int Columns { get; set; }
         public string[,] Matrix { get; set; }
 
+
+        //Board Constructors
         public Board(int rows, int columns) {
             Rows = rows;
             Columns = columns;
             Matrix = new string[Rows, Columns];
         }
 
+
+        //Board Methods
         public void Display() {
         //Displays current state of the board    
             
@@ -39,6 +46,26 @@ namespace ConnectFour {
     }
 
 
+    internal class Player {
+
+        //Player Properties
+        private string Name { get; set; }
+        private string Icon { get; set; }
+
+        //Player Constructors
+        public Player(string name, string icon) {
+            Name = name;
+            Icon = icon;
+        }
+
+        //PLayer Methods
+
+
+        public override string ToString() {
+            return $"Player Name: {Name}, Player Icon: {Icon}";
+        }
+    }
+
 
     internal class Program {
         static void Main(string[] args) {
@@ -47,6 +74,20 @@ namespace ConnectFour {
             var myBoard = new Board(6, 7);
 
             myBoard.Display();
+
+
+            Console.WriteLine("Please enter a name for player 1: ");
+            string namePlayer1 = Console.ReadLine();
+            var Player1 = new Player(namePlayer1, "X");
+            Console.WriteLine(Player1);
+
+            Console.WriteLine("Please enter a name for player 2: ");
+            string namePlayer2 = Console.ReadLine();
+            var Player2 = new Player(namePlayer2, "O");
+            Console.WriteLine(Player2);
+
+
+
 
         }
     }
