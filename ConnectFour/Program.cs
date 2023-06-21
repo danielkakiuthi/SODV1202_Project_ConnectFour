@@ -12,6 +12,7 @@ namespace ConnectFour {
         public int Columns { get; private set; }
         public string[,] Matrix { get; private set; }
         public List<int> ListValidColumnInputs { get; private set; }
+        public bool IsBoardFull { get; private set; }
 
 
         /* ------------------------------------------------------------------------------
@@ -22,6 +23,7 @@ namespace ConnectFour {
             Columns = columns;
             Matrix = new string[Rows, Columns];
             ListValidColumnInputs = new List<int>();
+            IsBoardFull = false;
 
             //Initialize Matrix with default "#" (not filled) symbol in all positions
             ResetBoard();
@@ -132,17 +134,17 @@ namespace ConnectFour {
         }
 
 
-        public bool CheckIfBoardFull() {
+        public void CheckIfBoardFull() {
         // check if there is still any position in the board with value "#" (not filled by a player yet).
             for (int i=0; i<Rows;i++) {
                 for (int j=0; j<Columns; j++) {
                     if (Matrix[1,j]=="#") {
-                        return false;
+                        IsBoardFull = false;
+                        return;
                     }
                 }
             }
-
-            return true;
+            IsBoardFull = true;
         }
 
 
@@ -261,10 +263,10 @@ namespace ConnectFour {
          * ------------------------------------------------------------------------------ */
         public Board MyBoard { get; private set; }
         public List<Player> ListPlayers { get; private set; }
-        public int MatchCounter { get; private set; }
         public int TurnCounter { get; private set; }
+        public int MatchCounter { get; private set; }
+        public bool IsMatchFinished { get; private set; }
         public bool IsGameFinished { get; private set; }
-        public bool KeepPlaying { get; set; }
 
 
         /* ------------------------------------------------------------------------------
@@ -275,10 +277,10 @@ namespace ConnectFour {
             int columns = 7;
             MyBoard = new Board(rows, columns);
             ListPlayers = new List<Player>(2);
-            MatchCounter = 1;
             TurnCounter = 1;
+            MatchCounter = 1;
+            IsMatchFinished = false;
             IsGameFinished = false;
-            KeepPlaying = true;
 
             MyBoard.ResetBoard();
         }
@@ -287,10 +289,10 @@ namespace ConnectFour {
         public GameController(int rows, int columns) {
             MyBoard = new Board(rows, columns);
             ListPlayers = new List<Player>(2);
-            MatchCounter = 1;
             TurnCounter = 1;
+            MatchCounter = 1;
+            IsMatchFinished = false;
             IsGameFinished = false;
-            KeepPlaying = true;
 
             MyBoard.ResetBoard();
         }
@@ -305,7 +307,7 @@ namespace ConnectFour {
             int selectedColumn;
 
             do {
-                Console.WriteLine($">> [Match {MatchCounter} | Turn {TurnCounter} | Player {((TurnCounter+1)%2)+1} ] Current Player ({currentPlayer.Icon}) : {currentPlayer.Name}.");
+                Console.WriteLine($">> [ Match {MatchCounter} | Turn {TurnCounter} | Player {((TurnCounter+1)%2)+1} ] Current Player ({currentPlayer.Icon}) : {currentPlayer.Name}.");
                 Console.WriteLine($"Please select a column number: ");
 
 
@@ -326,6 +328,16 @@ namespace ConnectFour {
 
             return selectedColumn;
         }
+        
+
+        private void DisplayPlayersScores() {
+
+            string result = "";
+            for (int i=0; i<ListPlayers.Count; i++) {
+                result += $"[ Player {i+1} | {ListPlayers[i].Icon} | {ListPlayers[i].Name} ]: {ListPlayers[i].ScoreMatches} matches won.\n";
+            }
+            Console.WriteLine(result);
+        }
 
 
         public void StartupMessage() {
@@ -340,7 +352,8 @@ namespace ConnectFour {
         //Reset Properties of GameController.
             MyBoard.ResetBoard();
             TurnCounter = 1;
-            IsGameFinished = false;
+            IsMatchFinished = false;
+            MyBoard.IsBoardFull = false;
         }
 
 
@@ -358,56 +371,63 @@ namespace ConnectFour {
             Player Player1 = new HumanPlayer(namePlayer1, "O");
             ListPlayers.Add(Player1);
             Console.WriteLine(Player1);
+
+            Console.Clear();
         }
 
 
-        public void Play() {
-        //Game Logic.
+        public void PlayMatch() {
+        //Match Logic.
 
             Player currentPlayer;
             int selectedColumn;
-            bool isBoardFull;
 
             do {
                 currentPlayer = ListPlayers[(TurnCounter+1)%2];
+
+                DisplayPlayersScores();
 
                 Console.WriteLine($"Board:\n{MyBoard.DisplayCurrentState()}\n");
                 
                 //Get a valid play
                 selectedColumn = PromptValidColumn(currentPlayer);
 
+                Console.Clear();
+
                 //Change board state with user input
                 MyBoard.UpdateValues(selectedColumn, currentPlayer);
 
                 //Check for winner (case: there is a winner)
-                IsGameFinished = MyBoard.CheckIfPlayerWon(currentPlayer);
-                if (IsGameFinished) {
+                IsMatchFinished = MyBoard.CheckIfPlayerWon(currentPlayer);
+                if (IsMatchFinished) {
+                    currentPlayer.UpdateScore();
+                    DisplayPlayersScores();
                     Console.WriteLine($"Board:\n{MyBoard.DisplayCurrentState()}\n");
                     Console.WriteLine($"It is a Connect 4. {currentPlayer.Name} Wins!\n\n");
-                    currentPlayer.UpdateScore();
                     MatchCounter++;
                 }
 
                 //check if board is full (case: draw)
-                isBoardFull = MyBoard.CheckIfBoardFull();
-                if (isBoardFull) {
+                MyBoard.CheckIfBoardFull();
+                if (MyBoard.IsBoardFull) {
+                    currentPlayer.UpdateScore();
+                    DisplayPlayersScores();
                     Console.WriteLine($"Board:\n{MyBoard.DisplayCurrentState()}\n");
                     Console.WriteLine($"The Board is Full. The game ended in a draw!\n\n");
-                    currentPlayer.UpdateScore();
                     MatchCounter++;
                 }
 
                 //Pass turn to next player
                 TurnCounter++;
 
-            } while ( (! IsGameFinished) && (! isBoardFull) );
+            } while ( (! IsMatchFinished) && (! MyBoard.IsBoardFull) );
 
         }
 
 
 
         public void PromptKeepPlaying() {
-        //Ask Player if game will be played again after ending a game.
+        //Ask Player if game will be played again after ending a match.
 
             string input;
 
@@ -415,13 +435,15 @@ namespace ConnectFour {
             do {
                 Console.WriteLine("Restart? Yes(1) No(0):");
                 input = Console.ReadLine();
+
+                Console.Clear();
             } while ( ! (input=="1" || input=="0"));
             
             if (input=="1") {
-                KeepPlaying = true;
+                IsGameFinished = false;
             }
             else if (input=="0") {
-                KeepPlaying= false;
+                IsGameFinished= true;
             }
         }
 
@@ -429,7 +451,7 @@ namespace ConnectFour {
         public void FinalScoreMessage() {
         //Final message to display at and of the game with total score of players.
             string result = "";
-            result += $"\n\nFinal Score of the matches:\n";
+            result += $"Final Score of the matches:\n";
 
             for (int i=0; i<ListPlayers.Count; i++) {
                 result += $"Player {i+1} ({ListPlayers[i].Name}): {ListPlayers[i].ScoreMatches} matches won.\n";
@@ -446,7 +468,7 @@ namespace ConnectFour {
                 result += $"The Game ended in a draw!!!\n";
             }
 
-            result += $"Have a nice day! =)";
+            result += $"Have a nice day! =)\n\n\n\n";
 
             Console.WriteLine(result);
         }
@@ -465,9 +487,9 @@ namespace ConnectFour {
             myGameController.AddPlayers();
 
 
-            while (myGameController.KeepPlaying) {
+            while ( ! myGameController.IsGameFinished) {
                 myGameController.ResetMatch();
-                myGameController.Play();
+                myGameController.PlayMatch();
                 myGameController.PromptKeepPlaying();
             }
 
