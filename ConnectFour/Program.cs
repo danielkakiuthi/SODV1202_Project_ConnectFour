@@ -227,6 +227,7 @@ namespace ConnectFour {
     }
 
 
+
     internal class ComputerPlayer : Player {
 
         /* ------------------------------------------------------------------------------
@@ -353,7 +354,7 @@ namespace ConnectFour {
             MyBoard.ResetBoard();
             TurnCounter = 1;
             IsMatchFinished = false;
-            MyBoard.IsBoardFull = false;
+            MyBoard.CheckIfBoardFull();
         }
 
 
