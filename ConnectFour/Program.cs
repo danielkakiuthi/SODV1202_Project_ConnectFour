@@ -199,6 +199,7 @@ namespace ConnectFour {
             ScoreMatches++;
         }
 
+        public abstract int MakeAMove(List<int> ListValidInputs);
 
         public int CompareTo(Player other) {
         //Compare Player objects by their ScoreMatches property.
@@ -215,13 +216,13 @@ namespace ConnectFour {
     internal class HumanPlayer : Player {
 
         /* ------------------------------------------------------------------------------
-         * ------------------------------ PLAYER PROPERTIES -----------------------------
+         * --------------------------- HUMAN PLAYER PROPERTIES --------------------------
          * ------------------------------------------------------------------------------ */
 
 
 
         /* ------------------------------------------------------------------------------
-         * ----------------------------- PLAYER CONSTRUCTORS ----------------------------
+         * --------------------------- HUMAN PLAYER CONSTRUCTORS ------------------------
          * ------------------------------------------------------------------------------ */
         public HumanPlayer(string name, string icon) : base(name, icon) {
 
@@ -229,11 +230,13 @@ namespace ConnectFour {
 
 
         /* ------------------------------------------------------------------------------
-         * ------------------------------- PLAYER METHODS -------------------------------
+         * ----------------------------- HUMAN PLAYER METHODS ---------------------------
          * ------------------------------------------------------------------------------ */
+        public override int MakeAMove(List<int> ListValidInputs) {
+            return int.Parse(Console.ReadLine());
+        }
 
 
-        
         public override string ToString() {
             return $"Human Player Name: {Name}, Player Icon: {Icon}";
         }
@@ -260,9 +263,13 @@ namespace ConnectFour {
         /* ------------------------------------------------------------------------------
          * ------------------------------- PLAYER METHODS -------------------------------
          * ------------------------------------------------------------------------------ */
+        public override int MakeAMove(List<int> ListValidInputs) {
+            Random r = new Random();
+
+            return r.Next(ListValidInputs.Min()-1, ListValidInputs.Max());
+        }
 
 
-        
         public override string ToString() {
             return $"Human Player Name: {Name}, Player Icon: {Icon}";
         }
@@ -277,6 +284,7 @@ namespace ConnectFour {
          * ------------------------------------------------------------------------------ */
         public Board MyBoard { get; private set; }
         public List<Player> ListPlayers { get; private set; }
+        public string GameMode { get; private set; }
         public int TurnCounter { get; private set; }
         public int MatchCounter { get; private set; }
         public bool IsMatchFinished { get; private set; }
@@ -330,7 +338,7 @@ namespace ConnectFour {
                 
                 //TODO: Implement a try/catch later (breaking when input not a number)
                 try {
-                    selectedColumn = int.Parse(Console.ReadLine());
+                    selectedColumn = currentPlayer.MakeAMove(MyBoard.ListValidColumnInputs);
                     isValidSelectedColumn = MyBoard.ValidateSelectedColumn(selectedColumn);
                 }
                 catch (FormatException e) {
@@ -379,20 +387,50 @@ namespace ConnectFour {
         }
 
 
+        public void PromptGameMode() {
+        //Ask user for Game Mode (Player vs Player | Player vs Computer) 
+
+            //keep asking until correct value is provided
+            do {
+                Console.WriteLine("\nSelect Game Mode:\nPlayer vs. Player (1)\nPlayer vs. Computer (2):");
+                GameMode = Console.ReadLine();
+
+                Console.Clear();
+            } while ( ! (GameMode=="1" || GameMode=="2"));
+        }
+        
+
         public void AddPlayers() {
         //Add players to list of players.
 
-            Console.WriteLine("Please enter a name for player 1: ");
-            string namePlayer0 = Console.ReadLine();
-            Player Player0 = new HumanPlayer(namePlayer0, "X");
-            ListPlayers.Add(Player0);
-            Console.WriteLine(Player0);
+            //Case Player vs Player
+            if (GameMode == "1") {
+                Console.WriteLine("Please enter a name for player 1: ");
+                string namePlayer0 = Console.ReadLine();
+                Player Player0 = new HumanPlayer(namePlayer0, "X");
+                ListPlayers.Add(Player0);
+                Console.WriteLine(Player0);
 
-            Console.WriteLine("Please enter a name for player 2: ");
-            string namePlayer1 = Console.ReadLine();
-            Player Player1 = new HumanPlayer(namePlayer1, "O");
-            ListPlayers.Add(Player1);
-            Console.WriteLine(Player1);
+                Console.WriteLine("Please enter a name for player 2: ");
+                string namePlayer1 = Console.ReadLine();
+                Player Player1 = new HumanPlayer(namePlayer1, "O");
+                ListPlayers.Add(Player1);
+                Console.WriteLine(Player1);
+            }
+            //Case Player vs Computer
+            else if (GameMode == "2") {
+                Console.WriteLine("Please enter a name for player 1: ");
+                string namePlayer0 = Console.ReadLine();
+                Player Player0 = new HumanPlayer(namePlayer0, "X");
+                ListPlayers.Add(Player0);
+                Console.WriteLine(Player0);
+
+                
+                Player Player1 = new ComputerPlayer("Computer#1", "O");
+                ListPlayers.Add(Player1);
+                Console.WriteLine(Player1);
+            }
+            
 
             Console.Clear();
         }
@@ -501,10 +539,13 @@ namespace ConnectFour {
     }
 
 
+
     internal class ColumnAlreadyFullException : Exception {
         public ColumnAlreadyFullException() {
         }
     }
+
+
 
     internal class ColumnOutOfRangeException : Exception {
         public ColumnOutOfRangeException() {
@@ -513,12 +554,14 @@ namespace ConnectFour {
     }
 
 
+
     internal class Program {
         static void Main(string[] args) {
 
             var myGameController = new GameController();
 
             myGameController.StartupMessage();
+            myGameController.PromptGameMode();
             myGameController.AddPlayers();
 
 
