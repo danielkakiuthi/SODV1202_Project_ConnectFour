@@ -134,7 +134,6 @@ namespace ConnectFour {
 
         public bool CheckIfBoardFull() {
         // check if there is still any position in the board with value "#" (not filled by a player yet).
-
             for (int i=0; i<Rows;i++) {
                 for (int j=0; j<Columns; j++) {
                     if (Matrix[1,j]=="#") {
@@ -157,7 +156,7 @@ namespace ConnectFour {
 
 
 
-    internal class Player {
+    internal abstract class Player : IComparable<Player> {
 
         /* ------------------------------------------------------------------------------
          * ------------------------------ PLAYER PROPERTIES -----------------------------
@@ -181,12 +180,75 @@ namespace ConnectFour {
          * ------------------------------- PLAYER METHODS -------------------------------
          * ------------------------------------------------------------------------------ */
         public void UpdateScore() {
+        //Increase Player score by 1.
             ScoreMatches++;
+        }
+
+
+        public int CompareTo(Player other) {
+        //Compare Player objects by their ScoreMatches property.
+            return ScoreMatches.CompareTo(other.ScoreMatches);
         }
 
         
         public override string ToString() {
             return $"Player Name: {Name}, Player Icon: {Icon}";
+        }
+    }
+
+
+    internal class HumanPlayer : Player {
+
+        /* ------------------------------------------------------------------------------
+         * ------------------------------ PLAYER PROPERTIES -----------------------------
+         * ------------------------------------------------------------------------------ */
+
+
+
+        /* ------------------------------------------------------------------------------
+         * ----------------------------- PLAYER CONSTRUCTORS ----------------------------
+         * ------------------------------------------------------------------------------ */
+        public HumanPlayer(string name, string icon) : base(name, icon) {
+
+        }
+
+
+        /* ------------------------------------------------------------------------------
+         * ------------------------------- PLAYER METHODS -------------------------------
+         * ------------------------------------------------------------------------------ */
+
+
+        
+        public override string ToString() {
+            return $"Human Player Name: {Name}, Player Icon: {Icon}";
+        }
+    }
+
+
+    internal class ComputerPlayer : Player {
+
+        /* ------------------------------------------------------------------------------
+         * ------------------------------ PLAYER PROPERTIES -----------------------------
+         * ------------------------------------------------------------------------------ */
+
+
+
+        /* ------------------------------------------------------------------------------
+         * ----------------------------- PLAYER CONSTRUCTORS ----------------------------
+         * ------------------------------------------------------------------------------ */
+        public ComputerPlayer(string name, string icon) : base(name, icon) {
+
+        }
+
+
+        /* ------------------------------------------------------------------------------
+         * ------------------------------- PLAYER METHODS -------------------------------
+         * ------------------------------------------------------------------------------ */
+
+
+        
+        public override string ToString() {
+            return $"Human Player Name: {Name}, Player Icon: {Icon}";
         }
     }
 
@@ -250,7 +312,7 @@ namespace ConnectFour {
 
                 //TODO: Implement a try/catch later (breaking when input not a number)
                 selectedColumn = int.Parse(Console.ReadLine());
-
+                
 
 
                 //Invalid input value case
@@ -287,13 +349,13 @@ namespace ConnectFour {
 
             Console.WriteLine("Please enter a name for player 1: ");
             string namePlayer0 = Console.ReadLine();
-            var Player0 = new Player(namePlayer0, "X");
+            Player Player0 = new HumanPlayer(namePlayer0, "X");
             ListPlayers.Add(Player0);
             Console.WriteLine(Player0);
 
             Console.WriteLine("Please enter a name for player 2: ");
             string namePlayer1 = Console.ReadLine();
-            var Player1 = new Player(namePlayer1, "O");
+            Player Player1 = new HumanPlayer(namePlayer1, "O");
             ListPlayers.Add(Player1);
             Console.WriteLine(Player1);
         }
@@ -373,10 +435,11 @@ namespace ConnectFour {
                 result += $"Player {i+1} ({ListPlayers[i].Name}): {ListPlayers[i].ScoreMatches} matches won.\n";
             }
 
-            if (ListPlayers[0].ScoreMatches > ListPlayers[1].ScoreMatches) {
+            //
+            if (ListPlayers[0].CompareTo(ListPlayers[1]) == 1) {
                 result += $"Congratulations {ListPlayers[0].Name}, you have won the Game!!!\n";
             }
-            else if (ListPlayers[0].ScoreMatches < ListPlayers[1].ScoreMatches) {
+            else if (ListPlayers[0].CompareTo(ListPlayers[1]) == -1) {
                 result += $"Congratulations {ListPlayers[1].Name}, you have won the Game!!!\n";
             }
             else {
