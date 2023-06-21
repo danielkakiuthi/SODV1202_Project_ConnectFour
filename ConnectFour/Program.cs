@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ConnectFour {
 
@@ -145,6 +146,18 @@ namespace ConnectFour {
                 }
             }
             IsBoardFull = true;
+        }
+
+
+        public bool ValidateSelectedColumn(int selectedColumn) {
+        //Check Case: Column is already full.
+            if ( ! ListValidColumnInputs.Contains(selectedColumn)) {
+                throw new ColumnOutOfRangeException();
+            }
+            else if (Matrix[0, selectedColumn-1]!="#") {
+                throw new ColumnAlreadyFullException();
+            }
+            return true;
         }
 
 
@@ -305,7 +318,8 @@ namespace ConnectFour {
         private int PromptValidColumn(Player currentPlayer) {
         //Get valid input from player (must be a valid column number and column must not be full)
 
-            int selectedColumn;
+            int selectedColumn = -1;
+            bool isValidSelectedColumn = false;
 
             do {
                 Console.WriteLine($">> [ Match {MatchCounter} | Turn {TurnCounter} | Player {((TurnCounter+1)%2)+1} ] Current Player ({currentPlayer.Icon}) : {currentPlayer.Name}.");
@@ -313,19 +327,26 @@ namespace ConnectFour {
 
 
 
-                //TODO: Implement a try/catch later (breaking when input not a number)
-                selectedColumn = int.Parse(Console.ReadLine());
                 
-
-
-                //Invalid input value case
-                if (! (MyBoard.ListValidColumnInputs.Contains(selectedColumn)) )
-                    Console.WriteLine("[Invalid input] Please select a valid column number.");
-                //Column is already full case
-                else if ( ! (MyBoard.Matrix[0, selectedColumn-1]=="#") ) {
-                    Console.WriteLine("[Invalid input] Column is full! Please select another column.");
+                //TODO: Implement a try/catch later (breaking when input not a number)
+                try {
+                    selectedColumn = int.Parse(Console.ReadLine());
+                    isValidSelectedColumn = MyBoard.ValidateSelectedColumn(selectedColumn);
                 }
-            } while ( ! ((MyBoard.ListValidColumnInputs.Contains(selectedColumn)) && (MyBoard.Matrix[0, selectedColumn-1]=="#")) );
+                catch (FormatException e) {
+                    Console.WriteLine($"[Invalid Text Input] Please select a valid column number ({MyBoard.ListValidColumnInputs.Min()}..{MyBoard.ListValidColumnInputs.Max()}). Error: {e.Message}");
+                }
+                catch (ColumnOutOfRangeException e) {
+                    Console.WriteLine($"[Invalid Column Selection] Please select a valid column number ({MyBoard.ListValidColumnInputs.Min()}..{MyBoard.ListValidColumnInputs.Max()}). Error: {e.Message}");
+                }
+                catch (ColumnAlreadyFullException e) {
+                    Console.WriteLine($"[Invalid Column Selection] Column is full! Please select another column. Error: {e.Message}");
+                }
+                catch (Exception e) {
+                    Console.WriteLine($"Error: {e.Message}");
+                }
+                
+            } while ( ! isValidSelectedColumn);
 
             return selectedColumn;
         }
@@ -458,18 +479,21 @@ namespace ConnectFour {
                 result += $"Player {i+1} ({ListPlayers[i].Name}): {ListPlayers[i].ScoreMatches} matches won.\n";
             }
 
-            //
+            result += "-----------------------------------------------------------------------------\n";
+
             if (ListPlayers[0].CompareTo(ListPlayers[1]) == 1) {
-                result += $"Congratulations {ListPlayers[0].Name}, you have won the Game!!!\n";
+                result += $"CONGRATULATIONS {ListPlayers[0].Name.ToUpper()}, YOU HAVE WON THE GAME!!!\n";
             }
             else if (ListPlayers[0].CompareTo(ListPlayers[1]) == -1) {
-                result += $"Congratulations {ListPlayers[1].Name}, you have won the Game!!!\n";
+                result += $"CONGRATULATIONS {ListPlayers[1].Name.ToUpper()}, YOU HAVE WON THE GAME!!!\n";
             }
             else {
-                result += $"The Game ended in a draw!!!\n";
+                result += $"THE GAME ENDED IN A DRAW!!!\n";
             }
 
-            result += $"Have a nice day! =)\n\n\n\n";
+            result += "-----------------------------------------------------------------------------\n";
+
+            result += $"\nHave a nice day! =)\n\n\n\n";
 
             Console.WriteLine(result);
         }
@@ -477,6 +501,16 @@ namespace ConnectFour {
     }
 
 
+    internal class ColumnAlreadyFullException : Exception {
+        public ColumnAlreadyFullException() {
+        }
+    }
+
+    internal class ColumnOutOfRangeException : Exception {
+        public ColumnOutOfRangeException() {
+
+        }
+    }
 
 
     internal class Program {
