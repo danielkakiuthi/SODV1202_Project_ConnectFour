@@ -139,7 +139,7 @@ namespace ConnectFour {
         // check if there is still any position in the board with value "#" (not filled by a player yet).
             for (int i=0; i<Rows;i++) {
                 for (int j=0; j<Columns; j++) {
-                    if (Matrix[1,j]=="#") {
+                    if (Matrix[i,j]=="#") {
                         IsBoardFull = false;
                         return;
                     }
@@ -194,7 +194,7 @@ namespace ConnectFour {
         /* ------------------------------------------------------------------------------
          * ------------------------------- PLAYER METHODS -------------------------------
          * ------------------------------------------------------------------------------ */
-        public void UpdateScore() {
+        public void IncreaseScore() {
         //Increase Player score by 1.
             ScoreMatches++;
         }
@@ -464,7 +464,7 @@ namespace ConnectFour {
                 //Check for winner (case: there is a winner)
                 IsMatchFinished = MyBoard.CheckIfPlayerWon(currentPlayer);
                 if (IsMatchFinished) {
-                    currentPlayer.UpdateScore();
+                    currentPlayer.IncreaseScore();
                     DisplayPlayersScores();
                     Console.WriteLine($"Board:\n{MyBoard.DisplayCurrentState()}\n");
                     Console.WriteLine($"It is a Connect 4. {currentPlayer.Name} Wins!\n\n");
@@ -474,10 +474,9 @@ namespace ConnectFour {
                 //check if board is full (case: draw)
                 MyBoard.CheckIfBoardFull();
                 if (MyBoard.IsBoardFull) {
-                    currentPlayer.UpdateScore();
                     DisplayPlayersScores();
                     Console.WriteLine($"Board:\n{MyBoard.DisplayCurrentState()}\n");
-                    Console.WriteLine($"The Board is Full. The game ended in a draw!\n\n");
+                    Console.WriteLine($"The Board is Full. The match ended in a draw!\n\n");
                     MatchCounter++;
                 }
 
@@ -562,7 +561,7 @@ namespace ConnectFour {
     internal class Program {
         static void Main(string[] args) {
 
-            var myGameController = new GameController();
+            var myGameController = new GameController(4,4);
 
             myGameController.StartupMessage();
             myGameController.PromptGameMode();
