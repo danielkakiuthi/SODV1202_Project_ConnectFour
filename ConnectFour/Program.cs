@@ -285,6 +285,7 @@ namespace ConnectFour {
         public Board MyBoard { get; private set; }
         public List<Player> ListPlayers { get; private set; }
         public string GameMode { get; private set; }
+        public int WhoPlaysFirst { get; set; }
         public int TurnCounter { get; private set; }
         public int MatchCounter { get; private set; }
         public bool IsMatchFinished { get; private set; }
@@ -330,13 +331,9 @@ namespace ConnectFour {
             bool isValidSelectedColumn = false;
 
             do {
-                Console.WriteLine($">> [ Match {MatchCounter} | Turn {TurnCounter} | Player {((TurnCounter+1)%2)+1} ] Current Player ({currentPlayer.Icon}) : {currentPlayer.Name}.");
+                Console.WriteLine($">> [ Match {MatchCounter} | Turn {TurnCounter} | Player {((WhoPlaysFirst+TurnCounter+1)%2)+1} ] Current Player ({currentPlayer.Icon}) : {currentPlayer.Name}.");
                 Console.WriteLine($"Please select a column number: ");
 
-
-
-                
-                //TODO: Implement a try/catch later (breaking when input not a number)
                 try {
                     selectedColumn = currentPlayer.MakeAMove(MyBoard.ListValidColumnInputs);
                     isValidSelectedColumn = MyBoard.ValidateSelectedColumn(selectedColumn);
@@ -431,8 +428,15 @@ namespace ConnectFour {
                 Console.WriteLine(Player1);
             }
             
-
             Console.Clear();
+        }
+
+
+        public void RandomlySelectWhoPlaysFirst() {
+        //Randomly select at beginning of match who goes first in the Match (Player[0] or Player[1]).
+            Random r = new Random();
+            WhoPlaysFirst =  r.Next(0,2);
+            Console.WriteLine($"It was randomly decided that Player {WhoPlaysFirst+1} will start!");
         }
 
 
@@ -443,7 +447,7 @@ namespace ConnectFour {
             int selectedColumn;
 
             do {
-                currentPlayer = ListPlayers[(TurnCounter+1)%2];
+                currentPlayer = ListPlayers[(WhoPlaysFirst+TurnCounter+1)%2];
 
                 DisplayPlayersScores();
 
@@ -566,6 +570,7 @@ namespace ConnectFour {
 
 
             while ( ! myGameController.IsGameFinished) {
+                myGameController.RandomlySelectWhoPlaysFirst();
                 myGameController.ResetMatch();
                 myGameController.PlayMatch();
                 myGameController.PromptKeepPlaying();
