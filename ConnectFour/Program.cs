@@ -113,7 +113,7 @@ namespace ConnectFour {
                 }
             }
 
-            //check primary diagonal win
+            //check primary diagonal win (top-left to bottom-right)
             for (int i=0; i<Rows-3; i++) {
                 for (int j=0; j<Columns-3; j++) {
                     if (Matrix[i,j]==currentPlayer.Icon && Matrix[i+1,j+1]==currentPlayer.Icon && Matrix[i+2,j+2]==currentPlayer.Icon && Matrix[i+3,j+3]==currentPlayer.Icon) {
@@ -122,7 +122,7 @@ namespace ConnectFour {
                 }
             }
 
-            //check secondary diagonal win
+            //check secondary diagonal win (bottom-left to top-right)
             for (int i=3; i<Rows; i++) {
                 for (int j=0; j<Columns-3; j++) {
                     if (Matrix[i,j]==currentPlayer.Icon && Matrix[i-1,j+1]==currentPlayer.Icon && Matrix[i-2,j+2]==currentPlayer.Icon && Matrix[i-3,j+3]==currentPlayer.Icon) {
@@ -176,9 +176,9 @@ namespace ConnectFour {
         /* ------------------------------------------------------------------------------
          * ------------------------------ PLAYER PROPERTIES -----------------------------
          * ------------------------------------------------------------------------------ */
-        public string Name { get; private set; }
-        public string Icon { get; private set; }
-        public int ScoreMatches { get; private set; }
+        public string Name { get; protected set; }
+        public string Icon { get; protected set; }
+        public int ScoreMatches { get; protected set; }
 
 
         /* ------------------------------------------------------------------------------
@@ -194,7 +194,7 @@ namespace ConnectFour {
         /* ------------------------------------------------------------------------------
          * ------------------------------- PLAYER METHODS -------------------------------
          * ------------------------------------------------------------------------------ */
-        public void IncreaseScore() {
+        public virtual void IncreaseScore() {
         //Increase Player score by 1.
             ScoreMatches++;
         }
@@ -247,13 +247,13 @@ namespace ConnectFour {
     internal class ComputerPlayer : Player {
 
         /* ------------------------------------------------------------------------------
-         * ------------------------------ PLAYER PROPERTIES -----------------------------
+         * ----------------------COMPUTER PLAYER PROPERTIES -----------------------------
          * ------------------------------------------------------------------------------ */
 
 
 
         /* ------------------------------------------------------------------------------
-         * ----------------------------- PLAYER CONSTRUCTORS ----------------------------
+         * -------------------- COMPUTER PLAYER CONSTRUCTORS ----------------------------
          * ------------------------------------------------------------------------------ */
         public ComputerPlayer(string name, string icon) : base(name, icon) {
 
@@ -261,12 +261,17 @@ namespace ConnectFour {
 
 
         /* ------------------------------------------------------------------------------
-         * ------------------------------- PLAYER METHODS -------------------------------
+         * ---------------------- COMPUTER PLAYER METHODS -------------------------------
          * ------------------------------------------------------------------------------ */
+        public override void IncreaseScore() {
+        //Increase Computer Player score by 10 if it wins.
+            ScoreMatches = ScoreMatches + 10;
+        }
+
         public override int MakeAMove(List<int> ListValidInputs) {
             Random r = new Random();
 
-            return r.Next(ListValidInputs.Min()-1, ListValidInputs.Max());
+            return r.Next(ListValidInputs.Min(), ListValidInputs.Max()+1);
         }
 
 
@@ -543,14 +548,14 @@ namespace ConnectFour {
 
 
 
-    internal class ColumnAlreadyFullException : Exception {
+    internal class ColumnAlreadyFullException : ApplicationException {
         public ColumnAlreadyFullException() {
         }
     }
 
 
 
-    internal class ColumnOutOfRangeException : Exception {
+    internal class ColumnOutOfRangeException : ApplicationException {
         public ColumnOutOfRangeException() {
 
         }
@@ -561,7 +566,7 @@ namespace ConnectFour {
     internal class Program {
         static void Main(string[] args) {
 
-            var myGameController = new GameController(4,4);
+            var myGameController = new GameController();
 
             myGameController.StartupMessage();
             myGameController.PromptGameMode();
